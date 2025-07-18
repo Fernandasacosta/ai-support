@@ -1,16 +1,16 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 const messageSchema = z.object({
-  role: z.enum(['USER', 'AGENT']),
+  role: z.enum(["USER", "AGENT"]),
   content: z.string(),
 });
 
 const completionsSchema = z.object({
   helpdeskId: z.number(),
-  projectName: z.enum(['tesla_motors']),
+  projectName: z.enum(["tesla_motors"]),
   messages: z.array(messageSchema),
 });
 
-type Message = z.infer<typeof messageSchema>
+type Message = z.infer<typeof messageSchema>;
 
-export { messageSchema, completionsSchema, Message }
+export { messageSchema, completionsSchema, Message };

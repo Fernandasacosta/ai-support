@@ -1,19 +1,41 @@
-import express from 'express'
-import { completionsSchema } from './validations/completions'
+import express from "express";
+import { completionsSchema } from "./validations/completions";
+import { getEmbeddings } from "./services/openAi";
 
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3000;
 
-const app = express()
-app.use(express.json())
+const app = express();
+app.use(express.json());
 
-app.post('/conversations/completions', (req, res) => {
-  const validatedBody = completionsSchema.safeParse(req.body)
+app.post("/conversations/completions", async (req, res) => {
+  const validatedBody = completionsSchema.safeParse(req.body);
 
-  if (validatedBody.error) res.status(400).json({ error: validatedBody.error.message })
+  if (validatedBody.error) {
+    return res.status(400).json({ error: validatedBody.error.message });
+  }
 
-  res.send('API funcionando!')
-})
+  const lastUserMessage =
+    validatedBody.data.messages[validatedBody.data.messages.length - 1];
+
+  if (lastUserMessage.role !== "USER") {
+    return res
+      .status(400)
+      .json({ error: "A última mensagem deve ser do usuário" });
+  }
+
+  try {
+    const { data: embeddingsData } = await getEmbeddings(
+      lastUserMessage.content
+    );
+
+    const embeddings = embeddingsData.data[0].embedding;
+  } catch {
+    return res.status(500).json({ error: "Erro interno do servidor" });
+  }
+
+  res.send("API funcionando!");
+});
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`)
-})
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
