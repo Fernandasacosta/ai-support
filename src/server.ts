@@ -1,7 +1,10 @@
 import express from "express";
 import { completionsSchema } from "./validations/completions";
-import { getEmbeddings } from "./services/openAi";
+import { getCompletions, getEmbeddings } from "./services/openAi";
 import { getSemanticSearch } from "./services/vectorDb";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 
@@ -36,11 +39,52 @@ app.post("/conversations/completions", async (req, res) => {
       embeddings,
       projectName,
     });
-  } catch {
+
+    const highestScoreResult = semanticSearch.value.reduce((max, item) =>
+      item["@search.score"] > max["@search.score"] ? item : max
+    );
+
+    if (highestScoreResult.type === "N2") {
+      return res.json({
+        messages: [
+          ...messages,
+          {
+            role: "AGENT",
+            content:
+              "I cannot answer that, will now be passing the conversation to a human",
+          },
+        ],
+        handoverToHumanNeeded: true,
+        sectionsRetrieved: semanticSearch.value.map((s) => ({
+          score: s["@search.score"],
+          content: s.content,
+        })),
+      });
+    } else {
+      const { data: completionsData } = await getCompletions({
+        messages,
+        semanticSeach: semanticSearch.value,
+        projectName,
+      });
+
+      return res.json({
+        messages: [
+          ...messages,
+          {
+            role: "AGENT",
+            content: completionsData.choices[0].message.content,
+          },
+        ],
+        handoverToHumanNeeded: false,
+        sectionsRetrieved: semanticSearch.value.map((s) => ({
+          score: s["@search.score"],
+          content: s.content,
+        })),
+      });
+    }
+  } catch (err) {
     return res.status(500).json({ error: "Erro interno do servidor" });
   }
-
-  res.send("API funcionando!");
 });
 
 app.listen(PORT, () => {

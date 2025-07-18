@@ -1,8 +1,8 @@
 import axios from "axios";
 import { Completion, Embeddings } from "./types";
 import { Message } from "../../validations/completions";
+import { SemanticSearch } from "../vectorDb/types";
 
-const OPEN_AI_KEY = process.env.OPEN_AI_KEY;
 const OPEN_AI_ENDPOINT = "https://api.openai.com/v1";
 
 const getEmbeddings = async (input: string) =>
@@ -14,13 +14,21 @@ const getEmbeddings = async (input: string) =>
     },
     {
       headers: {
-        Authorization: `Bearer ${OPEN_AI_KEY}`,
+        Authorization: `Bearer ${process.env.OPEN_AI_KEY}`,
         "Content-Type": "application/json",
       },
     }
   );
 
-const getCompletions = async (messages: Message[]) =>
+const getCompletions = async ({
+  messages,
+  semanticSeach,
+  projectName,
+}: {
+  messages: Message[];
+  semanticSeach: SemanticSearch["value"];
+  projectName: string;
+}) =>
   axios.post<Completion>(
     `${OPEN_AI_ENDPOINT}/chat/completions`,
     {
@@ -28,18 +36,22 @@ const getCompletions = async (messages: Message[]) =>
       messages: [
         {
           role: "system",
-          content:
-            "Your name is Claudia. You are a helpdesk assistant for the Tesla Motors project. You will answer questions about the project and its products. ",
+          content: `Your name is Claudia. You are a helpdesk assistant for the ${projectName} project. You will answer questions about the project and its products. Use the following information to answer questions: ${JSON.stringify(
+            semanticSeach
+          )}`,
         },
-        ...messages,
+        ...messages.map((m) => ({
+          role: m.role === "USER" ? "user" : "assistant",
+          content: m.content,
+        })),
       ],
     },
     {
       headers: {
-        Authorization: `Bearer ${OPEN_AI_KEY}`,
+        Authorization: `Bearer ${process.env.OPEN_AI_KEY}`,
         "Content-Type": "application/json",
       },
     }
   );
 
-export { getEmbeddings };
+export { getEmbeddings, getCompletions };
