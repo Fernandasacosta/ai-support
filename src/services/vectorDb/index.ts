@@ -1,8 +1,6 @@
 import axios from "axios";
 import { SemanticSearch } from "./types";
 
-const AZURE_AI_SEARCH_KEY = process.env.VECTOR_DB_KEY;
-
 const getSemanticSearch = ({
   embeddings,
   projectName,
@@ -29,7 +27,7 @@ const getSemanticSearch = ({
     {
       headers: {
         "Content-Type": "application/json",
-        "api-key": AZURE_AI_SEARCH_KEY,
+        "api-key": process.env.VECTOR_DB_KEY,
       },
     }
   );
