@@ -1,6 +1,7 @@
 import express from "express";
 import { completionsSchema } from "./validations/completions";
 import { getEmbeddings } from "./services/openAi";
+import { getSemanticSearch } from "./services/vectorDb";
 
 const PORT = process.env.PORT || 3000;
 
@@ -14,8 +15,9 @@ app.post("/conversations/completions", async (req, res) => {
     return res.status(400).json({ error: validatedBody.error.message });
   }
 
-  const lastUserMessage =
-    validatedBody.data.messages[validatedBody.data.messages.length - 1];
+  const { projectName, messages } = validatedBody.data;
+
+  const lastUserMessage = messages[validatedBody.data.messages.length - 1];
 
   if (lastUserMessage.role !== "USER") {
     return res
@@ -29,6 +31,11 @@ app.post("/conversations/completions", async (req, res) => {
     );
 
     const embeddings = embeddingsData.data[0].embedding;
+
+    const { data: semanticSearch } = await getSemanticSearch({
+      embeddings,
+      projectName,
+    });
   } catch {
     return res.status(500).json({ error: "Erro interno do servidor" });
   }
