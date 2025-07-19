@@ -23,9 +23,7 @@ app.post("/conversations/completions", async (req, res) => {
   const lastUserMessage = messages[validatedBody.data.messages.length - 1];
 
   if (lastUserMessage.role !== "USER") {
-    return res
-      .status(400)
-      .json({ error: "A última mensagem deve ser do usuário" });
+    return res.status(400).json({ error: "Last message should be from user" });
   }
 
   try {
@@ -83,10 +81,10 @@ app.post("/conversations/completions", async (req, res) => {
       });
     }
   } catch (err) {
-    return res.status(500).json({ error: "Erro interno do servidor" });
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
