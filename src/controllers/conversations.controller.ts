@@ -1,9 +1,31 @@
+import { Request, Response } from "express";
 import z from "zod";
 import { getCompletions, getEmbeddings } from "../services/openAi";
 import { getSemanticSearch } from "../services/vectorDb";
 import { completionsSchema } from "../validations/completions";
-import { Request, Response } from "express";
 
+/**
+ * Handles a conversation completion request by generating an AI response based on the latest user message.
+ *
+ * This controller:
+ * 1. Receives an already validated request body.
+ * 2. Extracts the last message and ensures it was sent by the user.
+ * 3. Generates embeddings for the message content.
+ * 4. Performs a semantic search using the embeddings and project name.
+ * 5. Decides whether to respond using the AI assistant or hand off to a human based on the top result.
+ * 6. Returns a response containing the updated message history, handover flag, and retrieved sections.
+ *
+ * @param req - Express request object, expected to contain a body matching `completionsSchema`.
+ * @param res - Express response object used to return the result or an error.
+ *
+ * @returns A JSON response with:
+ * - `messages`: Updated message array including the AI or handover message.
+ * - `handoverToHumanNeeded`: Boolean indicating if the user should be routed to a human.
+ * - `sectionsRetrieved`: Relevant sections retrieved from the semantic search, including score and content.
+ *
+ * @throws 400 - If the last message is not from the user.
+ * @throws 500 - For any unexpected internal errors.
+ */
 const conversationCompletionController = async (
   req: Request,
   res: Response
