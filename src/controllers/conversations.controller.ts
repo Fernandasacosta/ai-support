@@ -63,7 +63,7 @@ const conversationCompletionController = async (
           {
             role: "AGENT",
             content:
-              "I cannot answer that, will now be passing the conversation to a human",
+              "I'm sorry, I didn’t quite understand your message. I'll forward you to a human assistant who can better assist you.",
           },
         ],
         handoverToHumanNeeded: true,
