@@ -1,6 +1,15 @@
 import axios from "axios";
 import { SemanticSearch } from "./types";
 
+/**
+ * Azure AI Search POST endpoint, that retrieves the most relevant documents
+ * based on the provided embeddings and project name.
+ *
+ * @param embeddings - The numerical vector representing the user's query input.
+ * @param projectName - The name of the project used to filter search results.
+ *
+ * @returns A `SemanticSearch` type object (check on `/services/vectorDb/types.ts`)
+ */
 const getSemanticSearch = ({
   embeddings,
   projectName,
