@@ -51,7 +51,7 @@ const getCompletions = async ({
       messages: [
         {
           role: "system",
-          content: `Your name is Claudia. You are a helpdesk assistant for the ${projectName} project. You will answer questions about the project and its products. Use the following information to answer questions: ${JSON.stringify(
+          content: `Your name is Claudia. You are a helpdesk assistant for the ${projectName} project. If this is the user's first message, you must introduce yourself. You will answer questions about the project and its products. Generate the answer as simple text. Use the following information to answer questions: ${JSON.stringify(
             semanticSeach
           )}`,
         },
