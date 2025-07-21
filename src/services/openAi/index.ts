@@ -1,10 +1,15 @@
 import axios from "axios";
-import { Completion, Embeddings } from "./types";
 import { Message } from "../../validations/completions";
 import { SemanticSearch } from "../vectorDb/types";
+import { Completion, Embeddings } from "./types";
 
 const OPEN_AI_ENDPOINT = "https://api.openai.com/v1";
 
+/**
+ * OpenAI POST endpoint, that generates an array of embeddings for a given input string.
+ * @param input - The text input to generate embeddings for.
+ * @returns An `Embeddings` type object (check on `/services/openAi/types.ts`)
+ */
 const getEmbeddings = async (input: string) =>
   axios.post<Embeddings>(
     `${OPEN_AI_ENDPOINT}/embeddings`,
@@ -20,6 +25,16 @@ const getEmbeddings = async (input: string) =>
     }
   );
 
+/**
+ * OpenAI POST endpoint, that composes a message array with a system prompt and the conversation messages,
+ * using semantic search results as context for the assistant.
+ *
+ * @param messages - The conversation history, containing user and assistant messages.
+ * @param semanticSeach - The contextual data retrieved from semantic search to guide the assistant's response.
+ * @param projectName - The name of the project, used to personalize the system prompt.
+ *
+ * @returns A `Completion` type object (check on `/services/openAi/types.ts`)
+ */
 const getCompletions = async ({
   messages,
   semanticSeach,
@@ -54,4 +69,4 @@ const getCompletions = async ({
     }
   );
 
-export { getEmbeddings, getCompletions };
+export { getCompletions, getEmbeddings };
